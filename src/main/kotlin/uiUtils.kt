@@ -97,7 +97,7 @@ fun createAndShowWindow() {
     val panel = JPanel()
     val screenSize = Toolkit.getDefaultToolkit().screenSize
     val borderLayout = BorderLayout(10, 10)
-    val jTextPane = JTextPane()
+    val inputPanel = JTextPane()
     val toolbar = JToolBar()
     val progressBar = JProgressBar(0, 10000)
     val outputPanel = JTextArea()
@@ -106,18 +106,19 @@ fun createAndShowWindow() {
     panel.background = Color.GRAY
     panel.setSize((screenSize.width * 0.8).toInt(), (screenSize.height * 0.8).toInt())
     panel.layout = borderLayout
-    jTextPane.document.addDocumentListener(DocumentChangeListener(jTextPane))
+    inputPanel.document.addDocumentListener(DocumentChangeListener(inputPanel))
     panel.add(
-        jTextPane.makeScrollable(
+        inputPanel.makeScrollable(
             Dimension(
                 (screenSize.width * 0.8).toInt(),
                 (screenSize.height * 0.5).toInt()
             )
         ), BorderLayout.CENTER
     )
-    jTextPane.text = readFileText()
+    inputPanel.text = readFileText()
     outputPanel.text = "Output\n"
-    toolbar.add(createRunButton(UIContext(outputPanel, jTextPane, progressBar)))
+    outputPanel.isEditable = false
+    toolbar.add(createRunButton(UIContext(outputPanel, inputPanel, progressBar)))
     toolbar.add(progressBar)
     panel.add(toolbar, BorderLayout.NORTH)
     panel.add(
