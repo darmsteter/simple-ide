@@ -26,6 +26,19 @@ private val Long.nsAsS
 private val Double.nsAsS
     get() = this / 1_000_000_000
 
+private fun Set<Long>.estimatedTime(): Double {
+    var average = 0.0
+    var coeffSum = 0L
+    for ((index, time) in withIndex()) {
+        val coeff = index + 1
+        average += time * coeff
+        coeffSum += coeff
+    }
+    average /= coeffSum
+    if (average == 0.0) average = 0.00000001
+    return average
+}
+
 @OptIn(DelicateCoroutinesApi::class)
 fun createRunButton(uiContext: UIContext) = JButton("Run").apply {
     addActionListener {
@@ -38,13 +51,13 @@ fun createRunButton(uiContext: UIContext) = JButton("Run").apply {
             val runTimes = loadRunHistory(fileHash)
             val progressUpdateJob = if (runTimes.isNotEmpty()) {
                 uiContext.progressIsComputable(true)
-                val meanTime = runTimes.average()
-                println("Average run time is ${meanTime.nsAsS}s")
+                val estimatedTime = runTimes.estimatedTime()
+                println("Average run time is ${estimatedTime.nsAsS}s")
                 val startTime = System.nanoTime()
                 launch(Dispatchers.Swing) {
                     while (true) {
                         val currentTime = System.nanoTime()
-                        uiContext.setProgress(min(((currentTime - startTime) * 10000 / meanTime).toInt(), 9900))
+                        uiContext.setProgress(min(((currentTime - startTime) * 10000 / estimatedTime).toInt(), 9900))
                         delay(33)
                     }
                 }
